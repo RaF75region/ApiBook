@@ -1,0 +1,25 @@
+﻿API книжный сервис.
+
+////////////////////
+1) API имеет аутентификацию на основе Identity Framework.
+2) Используется 2 базы данных Postgres (строкт подключения прописаны в appsetting.json), которые находятся на одном хосте
+    a) ConnectionStrings - строка подключения для хранения данных по книгам
+    б) IdentityStrings - строка подключения для хранения пользьзовательских данных
+3) прикладываю дамп баз данных.
+4) backup баз данных в находятся в папке с решением
+
+/////////////////// методы ////////////////
+без роли:
+ - BookCatalogeApi/api/CreateUser - создание пользовател. Роль указывается в виде "admin" или "user"
+ - BookCatalogeApi/api/Auth - аутентификация пользователя и возвращение токена
+
+роль: admin
+ - Auth/api/CreateRole - позволяется создать доп роль
+ - BookCatalogeApi/api/AddOrChangeBook - позволяет добавить или изменить данные книги. Если в поле BookID не указать числовое значение, то создастся объект 
+ - BookCatalogeApi/api/BookDelete - удаление книги по ID
+
+роль: user
+ - BookCatalogeApi/api/BookSearch - поиск по строке ввода
+ - BookCatalogeApi/api/BookSearchCategory - поиск по выбранной категории
+ - BookCatalogeApi/api/BookAddFavorites - Добавление в избранное
+

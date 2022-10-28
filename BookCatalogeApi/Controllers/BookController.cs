@@ -7,8 +7,8 @@ using BookCatalogeApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Data;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace BookCatalogeApi.Controllers
 {
@@ -16,40 +16,126 @@ namespace BookCatalogeApi.Controllers
     public class BookController : Controller
     {
         private readonly IRepository repository;
-        public BookController(IRepository repository) {
+        private readonly SignInManager<IdentityUser> signInManager;
+
+        public BookController(IRepository repository, SignInManager<IdentityUser> signInManager) {
+            this.signInManager = signInManager;
             this.repository = repository;
         }
 
-        [HttpGet]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles ="admin")]
-        public IQueryable<Book> Get()
-        {
-            return repository.Books;
-        }
-
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+        [Route("AddOrChangeBook")]
+        public async Task<BookMessage> AddOrChangeBook([FromForm] BookAdd book)
         {
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                if (book.Book_ID is null)
+                {
+                    await book.Cover.CopyToAsync(memoryStream);
+                    Book bk = new Book
+                    {
+                        Author = book.Author,
+                        Cover = memoryStream.ToArray(),
+                        Year = book.Year.Year,
+                        Title = book.Title,
+                        Description = book.Description,
+                        Category = book.Category.ToString(),
+                        Number = book.Number
+                    };
+                    await repository.BookAdd(bk);
+                    return new BookMessage() { Succes = true, Message = "Книга добавлена в базу данных" };
+                }
+                else
+                {
+                    Book bk = repository.Books.Where(opt => opt.BookID == book.Book_ID).FirstOrDefault();
+                    await book.Cover.CopyToAsync(memoryStream);
+                    if (bk is not null)
+                    {
+                        bk.Author = book.Author;
+                        bk.Cover = memoryStream.ToArray();
+                        bk.Category = book.Category.ToString();
+                        bk.Description = book.Description;
+                        bk.Number = book.Number;
+                        bk.Year = book.Year.Year;
+                        bk.Title = book.Title;
+                        await repository.BookChange();
+                        return new BookMessage() { Book_ID = bk.BookID, Succes = true, Message = $"Данные книги {bk.BookID} изменены" };
+                    }
+                    
+                }
+
+            }
+            return new BookMessage() { Succes = false, Message = $"Ошибка добавления или изменения данных" };
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpDelete]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+        [Route("BookDelete")]
+        public async Task<BookMessage> BookDelete([FromForm] long idBook)
         {
+            if (ModelState.IsValid)
+            {
+                Book bk = repository.Books.Where(opt => opt.BookID == idBook).FirstOrDefault();
+                if(bk is not null)
+                {
+                    await repository.BookDelete(bk);
+                }
+                return new BookMessage() { Book_ID=bk.BookID, Succes=true, Message=$"Книга удалена"};
+            }
+            return new BookMessage() { Succes = false, Message = $"Ошибка удаления" };
         }
 
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "user")]
+        [Route("BookSearch")]
+        public Book[] BookSearch(string searchtxt)
         {
+            if (!string.IsNullOrEmpty(searchtxt))
+                return repository.Books.Where(opt =>
+                opt.Category.Contains(searchtxt.ToLower()) ||
+                opt.Description.Contains(searchtxt.ToLower()) ||
+                opt.Author.Contains(searchtxt.ToLower()) ||
+                opt.Title.Contains(searchtxt.ToLower()) ||
+                opt.Year.ToString().Contains(searchtxt.ToLower())
+            ).ToArray();
+            else
+                return repository.Books.ToArray();
+        }
+
+        [HttpGet]
+       // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "user")]
+        [Route("BookSearchCategory")]
+        public Book[] BookSearchCategory(CategoryBook? searchCategory)
+        {
+            if(searchCategory is not null)
+                return repository.Books.Where(opt =>
+                    opt.Category == searchCategory.ToString())
+                    .ToArray();
+            else
+                return repository.Books.ToArray();
+        }
+
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles ="user")]
+        [Route("BookAddFavorites")]
+        public async Task<BookMessage> BookAddFavorites(long id)
+        {
+            if (ModelState.IsValid)
+            {
+                Book book = repository.Books.Where(opt => opt.BookID == id).FirstOrDefault();
+                if (book is not null)
+                {
+                    var obj = new BookFavorites()
+                    {
+                        Book_ID = id,
+                        User_ID = User.Identity.Name
+                    };
+                    await repository.BookAddFavorites(obj);
+                    return new BookMessage() { Book_ID = id, Succes = true, Message = "Книга добавлена в избранное" };
+                }
+            }
+            return new BookMessage() { Book_ID = id, Succes = false, Message = "Книга не добавлена в избранное" };
         }
     }
 }

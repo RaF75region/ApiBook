@@ -1,11 +1,19 @@
 {
   "Version": 1,
-  "Hash": "a6GamqVKhthk0zP0vx+WDtRKaLuxkL+EsIwCHxpswX8=",
+  "Hash": "O9z2QfCoJGnb7v7b0QWEccIlz7tA+6AF3J5sWCO5+K0=",
   "Source": "BookCatalogeApi",
   "BasePath": "_content/BookCatalogeApi",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "BookCatalogeApi/wwwroot",
+      "Source": "BookCatalogeApi",
+      "ContentRoot": "/Users/al.kolobov/Projects/WebApiBookCataloge/BookCatalogeApi/BookCatalogeApi/wwwroot/",
+      "BasePath": "_content/BookCatalogeApi",
+      "Pattern": "**"
+    }
+  ],
   "Assets": []
 }

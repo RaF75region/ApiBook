@@ -12,6 +12,7 @@ namespace BookCatalogeApi.Context
         }
 
         public DbSet<Book> Books { get; set; }
+        public DbSet<BookFavorites> BookFavorites { get; set; }
     }
 }
 

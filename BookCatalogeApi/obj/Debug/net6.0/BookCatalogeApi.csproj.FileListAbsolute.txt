@@ -68,3 +68,4 @@
 /Users/al.kolobov/Projects/WebApiBookCataloge/BookCatalogeApi/BookCatalogeApi/bin/Debug/net6.0/Microsoft.Extensions.Identity.Core.dll
 /Users/al.kolobov/Projects/WebApiBookCataloge/BookCatalogeApi/BookCatalogeApi/bin/Debug/net6.0/Microsoft.Extensions.Identity.Stores.dll
 /Users/al.kolobov/Projects/WebApiBookCataloge/BookCatalogeApi/BookCatalogeApi/bin/Debug/net6.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/Users/al.kolobov/Projects/WebApiBookCataloge/BookCatalogeApi/BookCatalogeApi/bin/Debug/net6.0/BookCatalogeApi.staticwebassets.runtime.json

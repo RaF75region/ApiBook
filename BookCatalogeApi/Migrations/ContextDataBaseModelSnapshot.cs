@@ -38,9 +38,9 @@ namespace BookCatalogeApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Cover")
+                    b.Property<byte[]>("Cover")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("bytea");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -53,8 +53,8 @@ namespace BookCatalogeApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Year")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
 
                     b.HasKey("BookID");
 
